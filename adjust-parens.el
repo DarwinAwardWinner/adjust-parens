@@ -302,10 +302,58 @@ Binding to <backtab> (ie Shift-Tab) is a sensible choice."
     (adjust-parens-and-indent 'adjust-close-paren-for-dedent
                               parg)))
 
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "TAB") 'lisp-indent-adjust-parens)
-            (local-set-key (kbd "<backtab>") 'lisp-dedent-adjust-parens)))
+(defgroup adjust-parens nil
+  "DOC"
+  :group 'convenience)
+
+(defvar adjust-parens-mode-map (make-sparse-keymap)
+  "Keymap for `adjust-parens-mode'")
+(define-key adjust-parens-mode-map (kbd "TAB") 'lisp-indent-adjust-parens)
+(define-key adjust-parens-mode-map (kbd "<backtab>") 'lisp-dedent-adjust-parens)
+
+(define-minor-mode adjust-parens-mode
+  "DOC"
+  :group 'adjust-parens
+  :keymap adjust-parens-mode-map
+  (when adjust-parens-mode
+    (unless (memq major-mode adjust-parens-enabled-major-modes)
+      (warn "Major mode `%s' may not be suitable for `adjust-parens-mode'."
+            major-mode))))
+
+(defun adjust-parens-set-enabled-major-modes (sym val)
+  (set-default sym val)
+  (when (fboundp 'global-adjust-parens-mode)
+    (global-adjust-parens-mode (if val 1 -1))))
+
+(defcustom adjust-parens-enabled-major-modes
+  '(emacs-lisp-mode
+    common-lisp-mode
+    lisp-mode
+    scheme-mode
+    lisp-interaction-mode
+    inferior-lisp-mode)
+  "List of major modes in which to enable `adjust-parens-mode'.
+
+This only has an effect when `global-adjust-parens-mode' is
+non-nil."
+  :group 'adjust-parens
+  :type '(list (symbol :tag "Major mode"))
+  :set #'adjust-parens-set-enabled-major-modes)
+
+(defun adjust-parens-after-change-mm-hook ()
+  (when (memq major-mode adjust-parens-enabled-major-modes)
+    (adjust-parens-mode (if global-adjust-parens-mode 1 -1))))
+
+(define-globalized-minor-mode global-adjust-parens-mode adjust-parens-mode
+  (lambda ()
+    ;; Add or remove hook
+    (funcall (if global-adjust-parens-mode #'add-hook #'remove-hook)
+             'after-change-major-mode-hook
+             #'adjust-parens-after-change-mm-hook)
+    ;; Run the hook in existing buffers to enable/disable the mode
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (adjust-parens-after-change-mm-hook)))))
 
 (provide 'adjust-parens)
 
