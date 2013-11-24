@@ -247,7 +247,8 @@ scan-error to propogate up."
     (let ((orig-pos (point)))
       (back-to-indentation)
       (and (not (use-region-p))
-           (<= orig-pos (point))))))
+           (= (current-column) (calculate-lisp-indent))
+           (= orig-pos (point))))))
 
 (defun adjust-parens-and-indent (adjust-function parg)
   "Adjust close parens and indent the region over which the parens
