@@ -61,6 +61,32 @@
     (apt-check-buffer (concat ";;\n"
                               "(let ((x 10) (y (some-func 20))\n"
                               "      ")
-                      ")); Comment")))
+                      ")); Comment")
+    ;; Check what happens when point is not at the indentation, or
+    ;; indentation is not correct, or both
+    (beginning-of-line)                 ; Point not at indentation
+    ;; Should simply move point to indentation and not change buffer
+    (lisp-indent-adjust-parens)
+    (apt-check-buffer (concat ";;\n"
+                              "(let ((x 10) (y (some-func 20))\n"
+                              "      ")
+                      ")); Comment")
+    (delete-backward-char 3)            ; Incorrect indentation
+    ;; Should reindent line and move point to indentation but not
+    ;; change parens
+    (lisp-indent-adjust-parens)
+    (apt-check-buffer (concat ";;\n"
+                              "(let ((x 10) (y (some-func 20))\n"
+                              "      ")
+                      ")); Comment")
+    (insert "   ")                      ; Wrong indentation
+    (forward-char 2)                    ; Point is past indentation
+    ;; Should reindent buffer without moving point
+    (lisp-indent-adjust-parens)
+    (apt-check-buffer (concat ";;\n"
+                              "(let ((x 10) (y (some-func 20))\n"
+                              "      ))")
+                      "; Comment")
+    ))
 
 ;;; adjust-parens-tests.el ends here
