@@ -259,12 +259,12 @@ scan-error to propogate up."
 (defun adjust-parens-and-indent (adjust-function parg)
   "Adjust close parens and indent the region over which the parens
 moved."
-  (setq parg (or parg 1))
+  (cl-callf or parg 1)
   ;; Negative prefix arg inverts the behavior
   (when (< parg 0)
     (setq parg (- parg)
           adjust-function
-          (case adjust-function
+          (cl-case adjust-function
             (adjust-close-paren-for-indent 'adjust-close-paren-for-dedent)
             (adjust-close-paren-for-dedent 'adjust-close-paren-for-indent)
             (otherwise (error "Unknown adjust-function: %s" adjust-function)))))
@@ -322,20 +322,6 @@ Binding to <backtab> (ie Shift-Tab) is a sensible choice."
   "DOC"
   :group 'convenience)
 
-(defvar adjust-parens-mode-map (make-sparse-keymap)
-  "Keymap for `adjust-parens-mode'")
-(define-key adjust-parens-mode-map (kbd "TAB") 'lisp-indent-adjust-parens)
-(define-key adjust-parens-mode-map (kbd "<backtab>") 'lisp-dedent-adjust-parens)
-
-(define-minor-mode adjust-parens-mode
-  "DOC"
-  :group 'adjust-parens
-  :keymap adjust-parens-mode-map
-  (when adjust-parens-mode
-    (unless (memq major-mode adjust-parens-enabled-major-modes)
-      (warn "Major mode `%s' may not be suitable for `adjust-parens-mode'."
-            major-mode))))
-
 (defun adjust-parens-set-enabled-major-modes (sym val)
   (set-default sym val)
   (when (fboundp 'global-adjust-parens-mode)
@@ -355,6 +341,22 @@ non-nil."
   :group 'adjust-parens
   :type '(list (symbol :tag "Major mode"))
   :set #'adjust-parens-set-enabled-major-modes)
+
+(defvar adjust-parens-mode-map (make-sparse-keymap)
+  "Keymap for `adjust-parens-mode'")
+(define-key adjust-parens-mode-map (kbd "TAB") 'lisp-indent-adjust-parens)
+(define-key adjust-parens-mode-map (kbd "<backtab>") 'lisp-dedent-adjust-parens)
+
+(define-minor-mode adjust-parens-mode
+  "DOC"
+  :group 'adjust-parens
+  :keymap adjust-parens-mode-map
+  (when adjust-parens-mode
+    (unless (memq major-mode adjust-parens-enabled-major-modes)
+      (warn "Major mode `%s' may not be suitable for `adjust-parens-mode'."
+            major-mode))))
+
+(defvar global-adjust-parens-mode)
 
 (defun adjust-parens-after-change-mm-hook ()
   (when (memq major-mode adjust-parens-enabled-major-modes)
