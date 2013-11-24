@@ -247,7 +247,13 @@ scan-error to propogate up."
     (let ((orig-pos (point)))
       (back-to-indentation)
       (and (not (use-region-p))
-           (= (current-column) (calculate-lisp-indent))
+           ;; Corrent line is properly indented
+           (= (current-column)
+              (let ((indent (calculate-lisp-indent)))
+                (if (listp indent)
+                    (car indent)
+                  indent)))
+           ;; Point at indentation
            (= orig-pos (point))))))
 
 (defun adjust-parens-and-indent (adjust-function parg)
