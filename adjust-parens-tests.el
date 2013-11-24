@@ -32,6 +32,33 @@
                    (buffer-substring-no-properties (point)
                                                    (point-max)))))
 
+(ert-deftest apt-mode-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (adjust-parens-mode -1)
+    (should-not (eq (key-binding (kbd "TAB"))
+                    #'lisp-indent-adjust-parens))
+    (adjust-parens-mode 1)
+    (should (eq (key-binding (kbd "TAB"))
+                #'lisp-indent-adjust-parens))
+    (adjust-parens-mode -1)
+    (should-not (eq (key-binding (kbd "TAB"))
+                    #'lisp-indent-adjust-parens))))
+
+(ert-deftest apt-gloabl-mode-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (adjust-parens-mode 1)
+    (global-adjust-parens-mode -1)
+    (should-not (eq (key-binding (kbd "TAB"))
+                    #'lisp-indent-adjust-parens))
+    (global-adjust-parens-mode 1)
+    (should (eq (key-binding (kbd "TAB"))
+                #'lisp-indent-adjust-parens))
+    (global-adjust-parens-mode -1)
+    (should-not (eq (key-binding (kbd "TAB"))
+                    #'lisp-indent-adjust-parens))))
+
 (ert-deftest apt-near-bob-test ()
   (with-temp-buffer
     (emacs-lisp-mode)
