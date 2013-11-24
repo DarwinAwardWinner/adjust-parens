@@ -259,25 +259,35 @@ scan-error to propogate up."
 (defun adjust-parens-and-indent (adjust-function parg)
   "Adjust close parens and indent the region over which the parens
 moved."
-  (let ((region-of-change (list (point) (point))))
-    (cl-loop for i from 1 to (or parg 1)
-             with finished = nil
-             while (not finished)
-             do
-             (condition-case err
-                 (let ((close-paren-movement
-                        (funcall adjust-function)))
-                   (if close-paren-movement
-                       (setq region-of-change
-                             (list (min (car region-of-change)
-                                        (car close-paren-movement)
-                                        (cadr close-paren-movement))
-                                   (max (cadr region-of-change)
-                                        (car close-paren-movement)
-                                        (cadr close-paren-movement))))
-                     (setq finished t)))
-               (scan-error (setq finished err))))
-    (apply 'indent-region region-of-change))
+  (setq parg (or parg 1))
+  ;; Negative prefix arg inverts the behavior
+  (when (< parg 0)
+    (setq parg (- parg)
+          adjust-function
+          (case adjust-function
+            (adjust-close-paren-for-indent 'adjust-close-paren-for-dedent)
+            (adjust-close-paren-for-dedent 'adjust-close-paren-for-indent)
+            (otherwise (error "Unknown adjust-function: %s" adjust-function)))))
+  (when (> parg 0)
+    (let ((region-of-change (list (point) (point))))
+      (cl-loop for i from 1 to (or parg 1)
+               with finished = nil
+               while (not finished)
+               do
+               (condition-case err
+                   (let ((close-paren-movement
+                          (funcall adjust-function)))
+                     (if close-paren-movement
+                         (setq region-of-change
+                               (list (min (car region-of-change)
+                                          (car close-paren-movement)
+                                          (cadr close-paren-movement))
+                                     (max (cadr region-of-change)
+                                          (car close-paren-movement)
+                                          (cadr close-paren-movement))))
+                       (setq finished t)))
+                 (scan-error (setq finished err))))
+      (apply 'indent-region region-of-change)))
   (back-to-indentation))
 
 (defun lisp-indent-adjust-parens (&optional parg)
@@ -288,8 +298,11 @@ This command can be bound to TAB instead of indent-for-tab-command. It
 potentially calls the latter."
   (interactive "P")
   (if (adjust-parens-p)
-      (adjust-parens-and-indent 'adjust-close-paren-for-indent
-                                parg)
+      (adjust-parens-and-indent
+       'adjust-close-paren-for-indent
+       ;; Only pass an explicit numeric prefix, not `C-u' prefix.
+       (unless (listp parg)
+         (prefix-numeric-value parg)))
     (indent-for-tab-command parg)))
 
 (defun lisp-dedent-adjust-parens (&optional parg)
@@ -299,8 +312,11 @@ balanced expressions to be consistent.
 Binding to <backtab> (ie Shift-Tab) is a sensible choice."
   (interactive "P")
   (when (adjust-parens-p)
-    (adjust-parens-and-indent 'adjust-close-paren-for-dedent
-                              parg)))
+    (adjust-parens-and-indent
+     'adjust-close-paren-for-dedent
+     ;; Only pass an explicit numeric prefix, not `C-u' prefix.
+     (unless (listp parg)
+       (prefix-numeric-value parg)))))
 
 (defgroup adjust-parens nil
   "DOC"
