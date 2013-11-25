@@ -339,7 +339,7 @@ Binding to <backtab> (ie Shift-Tab) is a sensible choice."
 This only has an effect when `global-adjust-parens-mode' is
 non-nil."
   :group 'adjust-parens
-  :type '(list (symbol :tag "Major mode"))
+  :type '(repeat (symbol :tag "Major mode"))
   :set #'adjust-parens-set-enabled-major-modes)
 
 (defvar adjust-parens-mode-map (make-sparse-keymap)
