@@ -311,12 +311,16 @@ balanced expressions to be consistent.
 
 Binding to <backtab> (ie Shift-Tab) is a sensible choice."
   (interactive "P")
-  (when (adjust-parens-p)
-    (adjust-parens-and-indent
-     'adjust-close-paren-for-dedent
-     ;; Only pass an explicit numeric prefix, not `C-u' prefix.
-     (unless (listp parg)
-       (prefix-numeric-value parg)))))
+  (if (adjust-parens-p)
+      (adjust-parens-and-indent
+       'adjust-close-paren-for-dedent
+       ;; Only pass an explicit numeric prefix, not `C-u' prefix.
+       (unless (listp parg)
+         (prefix-numeric-value parg)))
+    ;; Move forward (but not back) to end of indentation (but don't
+    ;; change the indentation unlike `indent-for-tab-command'.
+    (when (< (current-column) (current-indentation))
+      (back-to-indentation))))
 
 (defgroup adjust-parens nil
   "DOC"
