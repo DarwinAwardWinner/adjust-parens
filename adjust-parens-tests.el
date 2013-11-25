@@ -98,6 +98,16 @@
                               "(let ((x 10) (y (some-func 20))\n"
                               "      ")
                       ")); Comment")
+
+    ;; Same check for dedent
+    (beginning-of-line)                 ; Point not at indentation
+    ;; Should simply move point to indentation and not change buffer
+    (lisp-dedent-adjust-parens)
+    (apt-check-buffer (concat ";;\n"
+                              "(let ((x 10) (y (some-func 20))\n"
+                              "      ")
+                      ")); Comment")
+
     (delete-backward-char 3)            ; Incorrect indentation
     ;; Should reindent line and move point to indentation but not
     ;; change parens
@@ -108,7 +118,7 @@
                       ")); Comment")
     (insert "   ")                      ; Wrong indentation
     (forward-char 2)                    ; Point is past indentation
-    ;; Should reindent buffer without moving point
+    ;; Should reindent line without moving point or changing parens
     (lisp-indent-adjust-parens)
     (apt-check-buffer (concat ";;\n"
                               "(let ((x 10) (y (some-func 20))\n"
