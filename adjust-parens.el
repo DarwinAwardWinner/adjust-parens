@@ -323,7 +323,7 @@ Binding to <backtab> (ie Shift-Tab) is a sensible choice."
       (back-to-indentation))))
 
 (defgroup adjust-parens nil
-  "DOC"
+  "Indent and dedent Lisp code, automatically adjust close parens."
   :group 'convenience)
 
 (defun adjust-parens-set-enabled-major-modes (sym val)
@@ -352,7 +352,7 @@ non-nil."
 (define-key adjust-parens-mode-map (kbd "<backtab>") 'lisp-dedent-adjust-parens)
 
 (define-minor-mode adjust-parens-mode
-  "DOC"
+  "Indent and dedent Lisp code, automatically adjust close parens."
   :group 'adjust-parens
   :keymap adjust-parens-mode-map
   (when adjust-parens-mode
