@@ -1,11 +1,28 @@
+2013-11-25  Ryan C. Thompson  <rct@thompsonclan.org>
+
+	* adjust-parens.el (adjust-parens-mode): Convert to minor mode
+	(global-adjust-parens-mode): Add globalized mode. Uses a custom
+	var to determine which modes to enable the mode in.
+	(adjust-parens-p): Only adjust parens after fixing indentation and
+	moving point to end of indentation.
+	(adjust-parens-and-indent): Correct handling of prefix arg. Now
+	only explicit numeric prefix arguments (i.e. not `C-u') affect the
+	number of parens adjusted, and negative & zero prefix are handled
+	correctly.
+
+	* adjust-parens-tests.el (apt-mode-test): Add tests for minor mode
+	enabling/disabling
+	(apt-indent-dedent-test): Add tests for behavior when indentation
+	is incorrect or point is not at end of indentation
+
 2013-10-28  Barry  <gundaetiapo@gmail.com>
 
-	* adjust-parens.el (last-sexp-with-relative-depth): Fix function 
+	* adjust-parens.el (last-sexp-with-relative-depth): Fix function
 	documentation which indicated negative depth when positive is correct.
 
 2013-10-23  Barry O'Reilly  <gundaetiapo@gmail.com>
 
-	* adjust-parens.el: Generalize to also work with alternative list 
+	* adjust-parens.el: Generalize to also work with alternative list
 	closing chars, such as Clojure's brackets.
 
 2013-10-08  Barry O'Reilly  <gundaetiapo@gmail.com>
@@ -21,4 +38,3 @@
 
 	* README: Update with corrected information.
 	* packages/adjust-parens/adjust-parens.el: Add new package.
-
